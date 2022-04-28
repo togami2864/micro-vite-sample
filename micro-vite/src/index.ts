@@ -1,4 +1,5 @@
 import cac from "cac";
+import { startBuild } from "./build";
 import { startDev } from "./dev";
 
 const cli = cac();
@@ -8,7 +9,7 @@ cli.command("dev").action(() => {
 });
 
 cli.command("build").action(() => {
-  console.log("build start");
+  startBuild();
 });
 
 cli.help();

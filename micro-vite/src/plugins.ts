@@ -2,11 +2,10 @@ import { resolve } from "./resolvePlugin";
 import esbuild from "rollup-plugin-esbuild";
 import { reload } from "./reloadPlugin";
 
-export const getPlugins = () => [
-  resolve(),
-  reload(),
+export const getPlugins = (isDev: boolean) => [
+  ...(isDev ? [resolve(), reload()] : []),
   esbuild({
-    target: "esnext",
-    minify: false,
+    target: isDev ? "esnext" : "es2019",
+    minify: !isDev,
   }),
 ];
