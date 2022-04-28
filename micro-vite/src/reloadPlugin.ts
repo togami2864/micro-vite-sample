@@ -1,8 +1,17 @@
 import type { Plugin } from "rollup";
 import { parse } from "node-html-parser";
+import WebSocket, { WebSocketServer } from "ws";
 
+const port = 24678;
 const virtualScriptId = "/@micro-vite:reload/script.js";
-const virtualScript = `console.log("bar")`;
+const virtualScript = `const ws = new WebSocket("ws://localhost:${port}/")
+ws.addEventListener("message", ({data}) => {
+    const msg = JSON.parse(data)
+    if(msg.type === "reload"){
+        location.reload()
+    }
+})
+`;
 
 export const reload = (): Plugin => {
   return {
@@ -27,6 +36,27 @@ export const reload = (): Plugin => {
           `<script type="module" src="${virtualScriptId}">`
         );
       return doc.toString();
+    },
+  };
+};
+
+interface Data {
+  type: string;
+}
+
+export const setupReloadServer = () => {
+  const wss = new WebSocketServer({
+    port,
+    host: "localhost",
+  });
+  let ws: WebSocket;
+  wss.on("connection", (connectWs) => {
+    ws = connectWs;
+  });
+  return {
+    send(data: Data) {
+      if (!ws) return;
+      ws.send(JSON.stringify(data));
     },
   };
 };
