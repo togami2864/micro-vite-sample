@@ -5,6 +5,7 @@ import { transformMiddleware } from "./transformMiddleware";
 import { createPluginContainer } from "./pluginContainer"; // 追加
 import { getPlugins } from "./plugins";
 import { setupReloadServer as setupWsServer } from "./reloadPlugin";
+import { createFileWatcher } from "./fileWatcher";
 
 export const startDev = () => {
   const server = connect();
@@ -26,8 +27,8 @@ export const startDev = () => {
   );
   server.use(historyApiFallback() as any);
   console.log("dev server running at http://localhost:3000");
-  setTimeout(() => {
-    console.log("reload");
+  createFileWatcher((eventName, path) => {
+    console.log(`Detected file change (${eventName}) reloading!: ${path}`);
     ws.send({ type: "reload" });
-  }, 1000 * 5);
+  });
 };
